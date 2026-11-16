@@ -68,6 +68,16 @@
   }
   .history h2, .gamelog h2 { font-size: 1.15rem; margin: 0; color: var(--accent-2); }
 
+  .next-game { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+  .next-game[hidden] { display: none; }
+  .next-game img { display: block; width: 54px; height: 36px; }
+  .next-game .ng-label { color: var(--muted); font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
+  .next-game .ng-opp { font-weight: 700; font-size: 1.05rem; }
+  .next-game .ng-when {
+    margin-left: auto; white-space: nowrap; font-weight: 700; font-size: .85rem;
+    color: var(--accent); background: var(--proj-bg); padding: 4px 10px; border-radius: 999px;
+  }
+
   .gamelog { margin-top: 32px; }
   .stepper { display: inline-flex; gap: 6px; align-items: center; max-width: 100%; }
   .stepper button, .stepper select {
@@ -124,6 +134,13 @@
   tbody tr:last-child td { border-bottom: none; }
   td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   td.pts { font-weight: 700; }
+  a.player-link {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--border);
+    text-underline-offset: 3px;
+  }
+  a.player-link:hover { color: var(--accent); text-decoration-color: currentColor; }
   td.logo-cell { padding-top: 4px; padding-bottom: 4px; }
   img.logo { display: block; height: 30px; width: 45px; } /* NHL logos are 3:2 */
   tr.projected td {
@@ -163,6 +180,8 @@
   </section>
 
   <section class="grid" id="cards"></section>
+
+  <section class="card next-game" id="next-game" hidden></section>
 
   <section class="history">
     <div class="history-head">
@@ -223,6 +242,13 @@
     { player: "Connor McDavid", team: "Edmonton Oilers",     season: "2022–23", logo: "EDM", gp: 82, g: 64, a: 89,  pts: 153 },
   ];
 
+  const PLAYER_URLS = {
+    "Wayne Gretzky":  "https://www.nhl.com/player/wayne-gretzky-8447400",
+    "Mario Lemieux":  "https://www.nhl.com/player/mario-lemieux-8448782",
+    "Connor McDavid": "https://www.nhl.com/player/connor-mcdavid-8478402",
+    "Steve Yzerman":  "https://www.nhl.com/player/steve-yzerman-8452578",
+  };
+
   let projection = null;
   let bestOnly = false;
 
@@ -248,9 +274,11 @@
     const html = rows.map((r, i) => {
       const rank = rows.findIndex(o => o.pts === r.pts) + 1;
       const tied = rows.filter(o => o.pts === r.pts).length > 1;
-      const name = r.projected
-        ? `${r.player}<span class="badge">Projected</span>`
+      const url = PLAYER_URLS[r.player];
+      const link = url
+        ? `<a class="player-link" href="${url}" target="_blank" rel="noopener">${r.player}</a>`
         : r.player;
+      const name = r.projected ? `${link}<span class="badge">Projected</span>` : link;
       return `
         <tr data-key="${r.player}|${r.season}"${r.projected ? ' class="projected"' : ""}>
           <td>${tied ? "T-" : ""}${rank}</td>
@@ -395,6 +423,29 @@
     });
   }
 
+  // ---- Next game ----
+
+  function renderNextGame(games) {
+    const el = document.getElementById("next-game");
+    const g = games.find(x => !x.completed);
+    if (!g) { el.hidden = true; return; }
+
+    // Whole days between today (local) and the game date.
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const days = Math.round((new Date(`${g.date}T12:00:00`) - today) / 864e5);
+    const when = days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
+
+    el.innerHTML = `
+      ${logoPicture(g.opponent_abbrev, g.opponent_full)}
+      <div>
+        <div class="ng-label">Next game · Game ${g.game_num}</div>
+        <div class="ng-opp">${g.home_game ? "vs" : "@"} ${g.opponent_full}</div>
+        <div class="gl-meta">${fmtDate(g.date, { weekday: "short", month: "short", day: "numeric" })} · ${g.home_game ? "Home" : "Road"}</div>
+      </div>
+      <div class="ng-when">${when}</div>`;
+    el.hidden = false;
+  }
+
   // ---- Game log panel ----
 
   function logoPicture(abbrev, alt) {
@@ -511,6 +562,7 @@
     document.getElementById("cards").innerHTML =
       card("Goals", goals) + card("Assists", assists) + card("Points", points);
 
+    renderNextGame(games);
     setupGameLog(games, completed);
 
     projection = {
