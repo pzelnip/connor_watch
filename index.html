@@ -78,6 +78,37 @@
     color: var(--accent); background: var(--proj-bg); padding: 4px 10px; border-radius: 999px;
   }
 
+  .pace { margin-top: 32px; }
+  .pace h2 { font-size: 1.15rem; margin: 0; color: var(--accent-2); }
+  .chart-card { position: relative; padding: 12px 8px 4px; }
+  .pace-chart { height: 260px; }
+  .pace-chart svg { display: block; overflow: visible; }
+  .pace-chart svg:focus { outline: none; }
+  .pace-chart svg:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; border-radius: 4px; }
+  .pace-chart .grid line { stroke: var(--border); stroke-width: 1; }
+  .pace-chart .axis text { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .pace-chart .ref line { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; opacity: .7; }
+  .pace-chart .ref text { fill: var(--muted); font-size: 11px; }
+  .pace-chart .series { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+  .pace-chart .dot { fill: var(--accent); stroke: var(--card); stroke-width: 2; }
+  .pace-chart .end-label {
+    fill: var(--text); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums;
+    paint-order: stroke; stroke: var(--card); stroke-width: 4px; stroke-linejoin: round; /* halo over ref lines */
+  }
+  .pace-chart .crosshair { stroke: var(--muted); stroke-width: 1; }
+  .pace-tip {
+    position: absolute; pointer-events: none; z-index: 2;
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.12);
+    padding: 8px 10px; font-size: .82rem; white-space: nowrap;
+  }
+  .pace-tip .tv { font-size: 1.1rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .pace-tip .tv::before {
+    content: ""; display: inline-block; width: 12px; height: 2px; margin-right: 6px;
+    background: var(--accent); vertical-align: middle; border-radius: 1px;
+  }
+  .pace-tip .tl { color: var(--muted); }
+
   .gamelog { margin-top: 32px; }
   .stepper { display: inline-flex; gap: 6px; align-items: center; max-width: 100%; }
   .stepper button, .stepper select {
@@ -182,6 +213,17 @@
   <section class="grid" id="cards"></section>
 
   <section class="card next-game" id="next-game" hidden></section>
+
+  <section class="pace">
+    <div class="history-head">
+      <h2>Projected points after each game</h2>
+    </div>
+    <div class="card chart-card">
+      <div id="pace-chart" class="pace-chart"></div>
+      <div id="pace-tip" class="pace-tip" hidden></div>
+    </div>
+    <p class="legend">Hover or use the arrow keys to see each game; click to open it in the game log.</p>
+  </section>
 
   <section class="history">
     <div class="history-head">
@@ -446,6 +488,144 @@
     el.hidden = false;
   }
 
+  // ---- Projection-over-time chart ----
+
+  const SVG_NS = "http://www.w3.org/2000/svg";
+  function svgEl(tag, attrs = {}, parent) {
+    const el = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    if (parent) parent.appendChild(el);
+    return el;
+  }
+
+  // onSelect(idx) is called with an index into `completed` when a game is clicked.
+  function renderPaceChart(allGames, completed, onSelect) {
+    // Projection as it stood after each completed game (same formula as the hero).
+    const points = [];
+    let gpThen = 0;
+    completed.forEach((g, i) => {
+      if (g.played) gpThen++;
+      if (!gpThen) return; // no rate until he's played a game
+      const pts = g.total_points_to_date;
+      points.push({ g, idx: i, x: g.game_num, y: pts + pts / gpThen * (allGames.length - (i + 1)) });
+    });
+    if (!points.length) return;
+
+    const host = document.getElementById("pace-chart");
+    const tip = document.getElementById("pace-tip");
+    const REFS = [{ y: 200, label: "200" }, { y: 215, label: "215 · Gretzky's record" }];
+    let active = points.length - 1;
+
+    function draw() {
+      host.textContent = "";
+      const W = host.clientWidth, H = host.clientHeight;
+      const m = { t: 14, r: 40, b: 24, l: 36 };
+      const svg = svgEl("svg", {
+        width: W, height: H, tabindex: 0, role: "img",
+        "aria-label": `Projected season points after each game; currently ${Math.round(points[points.length - 1].y)}.`,
+      }, host);
+
+      // Scales: x spans the whole season; y always includes both reference lines.
+      const ys = points.map(p => p.y).concat(REFS.map(r => r.y));
+      const step = Math.max(...ys) - Math.min(...ys) > 160 ? 40 : 20;
+      const yMin = Math.floor((Math.min(...ys) - 5) / step) * step;
+      const yMax = Math.ceil((Math.max(...ys) + 5) / step) * step;
+      const sx = n => m.l + (n - 1) / (allGames.length - 1) * (W - m.l - m.r);
+      const sy = v => m.t + (yMax - v) / (yMax - yMin) * (H - m.t - m.b);
+
+      // Gridlines + y labels.
+      const grid = svgEl("g", { class: "grid" }, svg);
+      const axis = svgEl("g", { class: "axis" }, svg);
+      for (let v = yMin; v <= yMax; v += step) {
+        svgEl("line", { x1: m.l, x2: W - m.r, y1: sy(v), y2: sy(v) }, grid);
+        svgEl("text", { x: m.l - 8, y: sy(v) + 4, "text-anchor": "end" }, axis).textContent = v;
+      }
+      // X labels: game 1 and every 10th.
+      [1, ...Array.from({ length: Math.floor(allGames.length / 10) }, (_, i) => (i + 1) * 10)]
+        .forEach(n => {
+          svgEl("text", { x: sx(n), y: H - 6, "text-anchor": "middle" }, axis).textContent = n === 1 ? "Game 1" : n;
+        });
+
+      // Reference lines (dashed = threshold, not data).
+      const ref = svgEl("g", { class: "ref" }, svg);
+      REFS.forEach(r => {
+        svgEl("line", { x1: m.l, x2: W - m.r, y1: sy(r.y), y2: sy(r.y) }, ref);
+        svgEl("text", { x: W - m.r, y: sy(r.y) - 5, "text-anchor": "end" }, ref).textContent = r.label;
+      });
+
+      // Series line + end dot with direct label.
+      svgEl("path", {
+        class: "series",
+        d: points.map((p, i) => `${i ? "L" : "M"}${sx(p.x).toFixed(1)},${sy(p.y).toFixed(1)}`).join(""),
+      }, svg);
+      const last = points[points.length - 1];
+      svgEl("circle", { class: "dot", cx: sx(last.x), cy: sy(last.y), r: 4.5 }, svg);
+      svgEl("text", { class: "end-label", x: sx(last.x) + 9, y: sy(last.y) + 4 }, svg)
+        .textContent = Math.round(last.y);
+
+      // Hover layer: crosshair + dot snapped to the nearest game.
+      const cross = svgEl("line", { class: "crosshair", y1: m.t, y2: H - m.b, visibility: "hidden" }, svg);
+      const hoverDot = svgEl("circle", { class: "dot", r: 4.5, visibility: "hidden" }, svg);
+      const hit = svgEl("rect", {
+        x: m.l - 6, y: 0, width: W - m.l - m.r + 12, height: H, fill: "transparent", style: "cursor:pointer",
+      }, svg);
+
+      function showAt(i) {
+        active = i;
+        const p = points[i];
+        const x = sx(p.x), y = sy(p.y);
+        cross.setAttribute("x1", x); cross.setAttribute("x2", x); cross.setAttribute("visibility", "visible");
+        hoverDot.setAttribute("cx", x); hoverDot.setAttribute("cy", y); hoverDot.setAttribute("visibility", "visible");
+
+        // Tooltip text via textContent (value first, context second).
+        const g = p.g;
+        tip.textContent = "";
+        const tv = document.createElement("div"); tv.className = "tv";
+        tv.textContent = `${Math.round(p.y)} projected`;
+        const tl = document.createElement("div"); tl.className = "tl";
+        tl.textContent = `Game ${g.game_num} · ${fmtDate(g.date, { month: "short", day: "numeric" })} ` +
+          `${g.home_game ? "vs" : "@"} ${g.opponent_abbrev} · ` +
+          (g.played ? `${g.goals}G ${g.assists}A` : "DNP") + ` · ${g.total_points_to_date} pts`;
+        tip.append(tv, tl);
+        tip.hidden = false;
+
+        // Keep the tooltip inside the card.
+        const card = tip.parentElement, cw = card.clientWidth, tw = tip.offsetWidth;
+        const left = Math.min(Math.max(host.offsetLeft + x - tw / 2, 4), cw - tw - 4);
+        tip.style.left = `${left}px`;
+        tip.style.top = `${Math.max(host.offsetTop + y - tip.offsetHeight - 14, 0)}px`;
+      }
+      function hide() {
+        cross.setAttribute("visibility", "hidden");
+        hoverDot.setAttribute("visibility", "hidden");
+        tip.hidden = true;
+      }
+      function nearest(evt) {
+        const px = evt.clientX - svg.getBoundingClientRect().left;
+        let best = 0;
+        points.forEach((p, i) => { if (Math.abs(sx(p.x) - px) < Math.abs(sx(points[best].x) - px)) best = i; });
+        return best;
+      }
+
+      hit.addEventListener("pointermove", e => showAt(nearest(e)));
+      hit.addEventListener("pointerleave", () => { if (document.activeElement !== svg) hide(); });
+      hit.addEventListener("click", e => onSelect(points[nearest(e)].idx));
+      svg.addEventListener("focus", () => showAt(active));
+      svg.addEventListener("blur", hide);
+      svg.addEventListener("keydown", e => {
+        if (e.key === "ArrowLeft") { showAt(Math.max(active - 1, 0)); e.preventDefault(); }
+        else if (e.key === "ArrowRight") { showAt(Math.min(active + 1, points.length - 1)); e.preventDefault(); }
+        else if (e.key === "Enter") onSelect(points[active].idx);
+      });
+    }
+
+    draw();
+    let lastW = host.clientWidth;
+    new ResizeObserver(() => {
+      if (host.clientWidth !== lastW) { lastW = host.clientWidth; draw(); }
+    }).observe(host);
+  }
+
   // ---- Game log panel ----
 
   function logoPicture(abbrev, alt) {
@@ -526,6 +706,7 @@
     prev.addEventListener("click", () => show(Number(select.value) - 1));
     next.addEventListener("click", () => show(Number(select.value) + 1));
     show(completed.length - 1);
+    return show;
   }
 
   async function main() {
@@ -563,7 +744,11 @@
       card("Goals", goals) + card("Assists", assists) + card("Points", points);
 
     renderNextGame(games);
-    setupGameLog(games, completed);
+    const showGame = setupGameLog(games, completed);
+    renderPaceChart(games, completed, idx => {
+      showGame(idx);
+      document.querySelector(".gamelog").scrollIntoView({ behavior: "smooth", block: "start" });
+    });
 
     projection = {
       player: "Connor McDavid",
