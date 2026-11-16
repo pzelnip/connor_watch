@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connor Watch</title>
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --text: #14181f;
+    --muted: #5b6472;
+    --border: #e2e5ea;
+    --accent: #ff4c00;   /* Oilers orange */
+    --accent-2: #041e42; /* Oilers navy */
+    --proj-bg: #fff1e8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1117;
+      --card: #161b22;
+      --text: #e6edf3;
+      --muted: #8b949e;
+      --border: #30363d;
+      --accent-2: #9fb7e0;
+      --proj-bg: #2a1a10;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; }
+  h1 { margin: 0; font-size: 1.6rem; color: var(--accent-2); }
+  .sub { margin: 4px 0 28px; color: var(--muted); }
+  .hero {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .hero .label { color: var(--muted); font-size: .9rem; text-transform: uppercase; letter-spacing: .06em; }
+  .hero .big { font-size: 4.5rem; font-weight: 800; line-height: 1.1; color: var(--accent); font-variant-numeric: tabular-nums; }
+  .hero .note { color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .card h2 { margin: 0 0 8px; font-size: 1rem; color: var(--muted); font-weight: 600; }
+  .card .proj { font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .card dl { margin: 8px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+  .card dt { color: var(--muted); }
+  .card dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+  .history { margin-top: 32px; }
+  .history-head {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+    gap: 8px 16px; margin-bottom: 12px;
+  }
+  .history h2, .gamelog h2 { font-size: 1.15rem; margin: 0; color: var(--accent-2); }
+
+  .gamelog { margin-top: 32px; }
+  .stepper { display: inline-flex; gap: 6px; align-items: center; max-width: 100%; }
+  .stepper button, .stepper select {
+    font: inherit; font-size: .9rem; color: var(--text);
+    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+    height: 34px;
+  }
+  .stepper button { width: 34px; font-size: 1.2rem; line-height: 1; cursor: pointer; }
+  .stepper button:disabled { opacity: .35; cursor: default; }
+  .stepper select { padding: 0 8px; min-width: 0; max-width: 240px; }
+  .gl-top { display: flex; align-items: center; gap: 14px; }
+  .gl-top img { display: block; width: 66px; height: 44px; }
+  .gl-opp { font-size: 1.15rem; font-weight: 700; }
+  .gl-meta { color: var(--muted); font-size: .88rem; }
+  .gl-result { margin-left: auto; font-weight: 800; font-size: 1.15rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .gl-result.win { color: #1f9d55; }
+  .gl-result.loss { color: #c62828; }
+  .gl-result small { font-weight: 600; color: var(--muted); font-size: .75rem; margin-left: 2px; }
+  .gl-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 16px; }
+  @media (max-width: 560px) {
+    .gl-stats { grid-template-columns: repeat(3, 1fr); }
+    .gl-top { flex-wrap: wrap; }
+  }
+  .gl-stat { background: var(--bg); border-radius: 8px; padding: 10px; text-align: center; }
+  .gl-stat .v { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .gl-stat .k { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+  .gl-stat.hl .v { color: var(--accent); }
+  .gl-extra { display: flex; flex-wrap: wrap; gap: 4px 20px; margin: 12px 0 0; font-size: .88rem; color: var(--muted); }
+  .gl-extra b { color: var(--text); font-variant-numeric: tabular-nums; }
+  .gl-dnp { margin-top: 16px; padding: 14px; border-radius: 8px; background: var(--bg); color: var(--muted); text-align: center; font-weight: 600; }
+  .toggle {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card);
+    padding: 3px;
+  }
+  .toggle button {
+    border: 0; background: none; color: var(--muted);
+    font: inherit; font-size: .85rem; font-weight: 600;
+    padding: 5px 14px; border-radius: 999px; cursor: pointer;
+  }
+  .toggle button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+  .table-wrap {
+    overflow-x: auto;
+    overflow-y: hidden; /* no scrollbar flash while height animates */
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; }
+  tbody tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  td.pts { font-weight: 700; }
+  td.logo-cell { padding-top: 4px; padding-bottom: 4px; }
+  img.logo { display: block; height: 30px; width: 45px; } /* NHL logos are 3:2 */
+  tr.projected td {
+    background: var(--proj-bg);
+    font-style: italic;
+  }
+  tr.projected td:first-child { box-shadow: inset 4px 0 0 var(--accent); }
+  tr.projected td.pts { color: var(--accent); }
+  .badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-style: normal;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    background: var(--accent);
+    color: #fff;
+    vertical-align: 1px;
+  }
+  .legend { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+  .error { color: #c62828; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Connor Watch</h1>
+  <p class="sub" id="sub">Connor McDavid's 2026–27 pace, projected over an 84-game season</p>
+
+  <section class="hero">
+    <div class="label">Projected points</div>
+    <div class="big" id="proj-points">–</div>
+    <div class="note" id="hero-note"></div>
+  </section>
+
+  <section class="grid" id="cards"></section>
+
+  <section class="history">
+    <div class="history-head">
+      <h2>Best single-season point totals in NHL history</h2>
+      <div class="toggle" role="group" aria-label="Table view">
+        <button type="button" data-mode="all" aria-pressed="true">All seasons</button>
+        <button type="button" data-mode="best" aria-pressed="false">Best per player</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th><th>Player</th><th>Team</th><th>Season</th>
+            <th class="num">GP</th><th class="num">G</th><th class="num">A</th><th class="num">Pts</th>
+          </tr>
+        </thead>
+        <tbody id="history-body"></tbody>
+      </table>
+    </div>
+    <p class="legend">The highlighted row is the current season, projected over 84 games at his current pace.</p>
+  </section>
+
+  <section class="gamelog">
+    <div class="history-head">
+      <h2>Game log</h2>
+      <div class="stepper">
+        <button type="button" id="gl-prev" aria-label="Previous game">‹</button>
+        <select id="gl-select" aria-label="Choose a game"></select>
+        <button type="button" id="gl-next" aria-label="Next game">›</button>
+      </div>
+    </div>
+    <div class="card" id="gl-body"></div>
+  </section>
+
+  <footer id="footer"></footer>
+</main>
+
+<script>
+  const SEASON_GAMES = 84;
+
+  // Top 15 single-season point totals before 2026–27.
+  const HISTORY = [
+    { player: "Wayne Gretzky",  team: "Edmonton Oilers",     season: "1985–86", logo: "EDM_19791980-19851986", gp: 80, g: 52, a: 163, pts: 215 },
+    { player: "Wayne Gretzky",  team: "Edmonton Oilers",     season: "1981–82", logo: "EDM_19791980-19851986", gp: 80, g: 92, a: 120, pts: 212 },
+    { player: "Wayne Gretzky",  team: "Edmonton Oilers",     season: "1984–85", logo: "EDM_19791980-19851986", gp: 80, g: 73, a: 135, pts: 208 },
+    { player: "Wayne Gretzky",  team: "Edmonton Oilers",     season: "1983–84", logo: "EDM_19791980-19851986", gp: 74, g: 87, a: 118, pts: 205 },
+    { player: "Mario Lemieux",  team: "Pittsburgh Penguins", season: "1988–89", logo: "PIT_19721973-19911992", gp: 76, g: 85, a: 114, pts: 199 },
+    { player: "Wayne Gretzky",  team: "Edmonton Oilers",     season: "1982–83", logo: "EDM_19791980-19851986", gp: 80, g: 71, a: 125, pts: 196 },
+    { player: "Wayne Gretzky",  team: "Edmonton Oilers",     season: "1986–87", logo: "EDM_19861987-19951996", gp: 79, g: 62, a: 121, pts: 183 },
+    { player: "Mario Lemieux",  team: "Pittsburgh Penguins", season: "1987–88", logo: "PIT_19721973-19911992", gp: 77, g: 70, a: 98,  pts: 168 },
+    { player: "Wayne Gretzky",  team: "Los Angeles Kings",   season: "1988–89", logo: "LAK_19881989-19971998", gp: 78, g: 54, a: 114, pts: 168 },
+    { player: "Wayne Gretzky",  team: "Edmonton Oilers",     season: "1980–81", logo: "EDM_19791980-19851986", gp: 80, g: 55, a: 109, pts: 164 },
+    { player: "Wayne Gretzky",  team: "Los Angeles Kings",   season: "1990–91", logo: "LAK_19881989-19971998", gp: 78, g: 41, a: 122, pts: 163 },
+    { player: "Mario Lemieux",  team: "Pittsburgh Penguins", season: "1995–96", logo: "PIT_19921993-19981999", gp: 70, g: 69, a: 92,  pts: 161 },
+    { player: "Mario Lemieux",  team: "Pittsburgh Penguins", season: "1992–93", logo: "PIT_19921993-19981999", gp: 60, g: 69, a: 91,  pts: 160 },
+    { player: "Steve Yzerman",  team: "Detroit Red Wings",   season: "1988–89", logo: "DET", gp: 80, g: 65, a: 90,  pts: 155 },
+    { player: "Connor McDavid", team: "Edmonton Oilers",     season: "2022–23", logo: "EDM", gp: 82, g: 64, a: 89,  pts: 153 },
+  ];
+
+  let projection = null;
+  let bestOnly = false;
+
+  // Keep each player's highest season. The projected row is always kept;
+  // if it beats McDavid's previous best, that older season drops out.
+  function bestPerPlayer(sortedRows) {
+    const seen = new Set();
+    return sortedRows.filter(r => {
+      if (r.projected) { seen.add(r.player); return true; }
+      if (seen.has(r.player)) return false;
+      seen.add(r.player);
+      return true;
+    });
+  }
+
+  function renderHistory() {
+    // Projected row goes ahead of any historical season with the same total.
+    let rows = [...HISTORY, ...(projection ? [projection] : [])].sort(
+      (x, y) => y.pts - x.pts || (y.projected ? 1 : 0) - (x.projected ? 1 : 0));
+    if (bestOnly) rows = bestPerPlayer(rows);
+
+    // Competition ranking: ties share a rank, next rank skips ahead.
+    const html = rows.map((r, i) => {
+      const rank = rows.findIndex(o => o.pts === r.pts) + 1;
+      const tied = rows.filter(o => o.pts === r.pts).length > 1;
+      const name = r.projected
+        ? `${r.player}<span class="badge">Projected</span>`
+        : r.player;
+      return `
+        <tr data-key="${r.player}|${r.season}"${r.projected ? ' class="projected"' : ""}>
+          <td>${tied ? "T-" : ""}${rank}</td>
+          <td>${name}</td>
+          <td class="logo-cell">
+            <picture>
+              <source srcset="logos/${r.logo}_dark.svg" media="(prefers-color-scheme: dark)">
+              <img class="logo" src="logos/${r.logo}_light.svg" alt="${r.team}" title="${r.team}">
+            </picture>
+          </td>
+          <td>${r.season}</td>
+          <td class="num">${r.gp}</td>
+          <td class="num">${r.g}</td>
+          <td class="num">${r.a}</td>
+          <td class="num pts">${r.pts}</td>
+        </tr>`;
+    }).join("");
+    swapRows(html);
+  }
+
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let swapToken = 0;
+
+  // Animated tbody swap: fade out leaving rows, then FLIP-slide rows present
+  // in both views to their new spots while new rows fade in.
+  function swapRows(html) {
+    const body = document.getElementById("history-body");
+    const wrap = body.closest(".table-wrap");
+    const oldRows = [...body.rows];
+    if (!oldRows.length || reduceMotion.matches) { body.innerHTML = html; return; }
+
+    const token = ++swapToken;
+    const oldTops = new Map(oldRows.map(tr => [tr.dataset.key, tr.getBoundingClientRect().top]));
+    const oldHeight = wrap.offsetHeight;
+    const incoming = new Set([...html.matchAll(/data-key="([^"]*)"/g)].map(m => m[1]));
+
+    const fades = oldRows
+      .filter(tr => !incoming.has(tr.dataset.key))
+      .map(tr => tr.animate([{ opacity: 1 }, { opacity: 0 }],
+        { duration: 150, easing: "ease-out", fill: "forwards" }).finished.catch(() => {}));
+
+    Promise.all(fades).then(() => {
+      if (token !== swapToken) return; // a newer toggle click took over
+      body.innerHTML = html;
+
+      wrap.animate([{ height: `${oldHeight}px` }, { height: `${wrap.offsetHeight}px` }],
+        { duration: 300, easing: "ease-in-out" });
+
+      for (const tr of body.rows) {
+        const oldTop = oldTops.get(tr.dataset.key);
+        if (oldTop !== undefined) {
+          const dy = oldTop - tr.getBoundingClientRect().top;
+          if (dy) tr.animate([{ transform: `translateY(${dy}px)` }, { transform: "none" }],
+            { duration: 300, easing: "ease-in-out" });
+        } else {
+          tr.animate([{ opacity: 0 }, { opacity: 1 }],
+            { duration: 250, delay: 120, easing: "ease-out", fill: "backwards" });
+        }
+      }
+    });
+  }
+
+  document.querySelectorAll(".toggle button").forEach(btn => {
+    btn.addEventListener("click", () => {
+      bestOnly = btn.dataset.mode === "best";
+      document.querySelectorAll(".toggle button").forEach(b =>
+        b.setAttribute("aria-pressed", String(b === btn)));
+      renderHistory();
+    });
+  });
+
+  // Season state from games.json, filled in by main().
+  let gp = 0;          // games he actually played
+  let remaining = 0;   // Oilers games left on the schedule
+
+  // Current total plus his per-game rate over every remaining game.
+  // Games he already missed count as zero; they can't be made up.
+  function project(current) {
+    return current + (gp ? current / gp : 0) * remaining;
+  }
+
+  function card(title, current) {
+    const perGame = gp ? current / gp : 0;
+    return `
+      <div class="card">
+        <h2>${title}</h2>
+        <div class="proj">${Math.round(project(current))}</div>
+        <dl>
+          <dt>So far</dt><dd>${current}</dd>
+          <dt>Per game</dt><dd>${perGame.toFixed(2)}</dd>
+        </dl>
+      </div>`;
+  }
+
+  // ---- Game log panel ----
+
+  function logoPicture(abbrev, alt) {
+    return `<picture>
+      <source srcset="logos/${abbrev}_dark.svg" media="(prefers-color-scheme: dark)">
+      <img src="logos/${abbrev}_light.svg" alt="${alt}" title="${alt}">
+    </picture>`;
+  }
+
+  function fmtDate(iso, opts) {
+    return new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, opts);
+  }
+
+  function setupGameLog(allGames, completed) {
+    const select = document.getElementById("gl-select");
+    const prev = document.getElementById("gl-prev");
+    const next = document.getElementById("gl-next");
+    const body = document.getElementById("gl-body");
+
+    // Newest first in the dropdown.
+    select.innerHTML = completed.slice().reverse().map((g, i) => {
+      const idx = completed.length - 1 - i;
+      const at = g.home_game ? "vs" : "@";
+      const pts = g.played ? `${g.goals + g.assists} pts` : "DNP";
+      return `<option value="${idx}">Game ${g.game_num} · ${fmtDate(g.date, { month: "short", day: "numeric" })} ${at} ${g.opponent_abbrev} · ${pts}</option>`;
+    }).join("");
+
+    function show(idx) {
+      const g = completed[idx];
+      select.value = String(idx);
+      prev.disabled = idx === 0;
+      next.disabled = idx === completed.length - 1;
+
+      // Pace as it stood right after this game.
+      const upTo = completed.slice(0, idx + 1);
+      const gpThen = upTo.filter(x => x.played).length;
+      const ptsThen = g.total_points_to_date;
+      const paceThen = gpThen
+        ? Math.round(ptsThen + ptsThen / gpThen * (allGames.length - upTo.length))
+        : null;
+
+      const won = g.oilers_score > g.opponent_score;
+      const extraTime = g.decided_in && g.decided_in !== "REG" ? `<small>${g.decided_in}</small>` : "";
+      const result = g.oilers_score === null ? "" :
+        `<div class="gl-result ${won ? "win" : "loss"}">${won ? "W" : "L"} ${g.oilers_score}–${g.opponent_score}${extraTime}</div>`;
+
+      const stat = (k, v, hl) => `<div class="gl-stat${hl ? " hl" : ""}"><div class="v">${v}</div><div class="k">${k}</div></div>`;
+      const pm = g.plus_minus > 0 ? `+${g.plus_minus}` : g.plus_minus;
+
+      body.innerHTML = `
+        <div class="gl-top">
+          ${logoPicture(g.opponent_abbrev, g.opponent_full)}
+          <div>
+            <div class="gl-opp">${g.home_game ? "vs" : "@"} ${g.opponent_full}</div>
+            <div class="gl-meta">Game ${g.game_num} · ${fmtDate(g.date, { weekday: "short", month: "short", day: "numeric", year: "numeric" })} · ${g.home_game ? "Home" : "Road"}</div>
+          </div>
+          ${result}
+        </div>
+        ${g.played ? `
+          <div class="gl-stats">
+            ${stat("Goals", g.goals)}
+            ${stat("Assists", g.assists)}
+            ${stat("Points", g.goals + g.assists, true)}
+            ${stat("Season pts", ptsThen)}
+            ${stat("Pace after", paceThen ?? "–")}
+          </div>
+          <div class="gl-extra">
+            <span>Shots <b>${g.shots ?? "–"}</b></span>
+            <span>+/- <b>${pm ?? "–"}</b></span>
+            <span>TOI <b>${g.toi ?? "–"}</b></span>
+            <span>PP points <b>${g.power_play_points ?? "–"}</b></span>
+          </div>` : `
+          <div class="gl-dnp">Did not play · season total stays at ${ptsThen} pts</div>`}
+      `;
+    }
+
+    select.addEventListener("change", () => show(Number(select.value)));
+    prev.addEventListener("click", () => show(Number(select.value) - 1));
+    next.addEventListener("click", () => show(Number(select.value) + 1));
+    show(completed.length - 1);
+  }
+
+  async function main() {
+    let games;
+    try {
+      const resp = await fetch("games.json", { cache: "no-store" });
+      games = (await resp.json()).games;
+    } catch (e) {
+      document.getElementById("hero-note").innerHTML =
+        '<span class="error">Couldn\'t load games.json. Serve this folder over HTTP (e.g. <code>python3 -m http.server</code>).</span>';
+      return;
+    }
+    if (!games.length) return;
+
+    // Upcoming games are placeholders with null stats.
+    const completed = games.filter(g => g.goals !== null);
+    if (!completed.length) return;
+    const played = completed.filter(g => g.played);
+    gp = played.length;
+    remaining = games.length - completed.length;
+    const missed = completed.length - gp;
+    const goals = played.reduce((s, g) => s + g.goals, 0);
+    const assists = played.reduce((s, g) => s + g.assists, 0);
+    const points = goals + assists;
+    const projPoints = Math.round(project(points));
+
+    document.getElementById("proj-points").textContent = projPoints;
+    document.getElementById("hero-note").textContent =
+      `${points} points in ${gp} games played` +
+      (missed ? ` (missed ${missed})` : "") +
+      ` · ${remaining} of ${games.length} games remaining` +
+      (projPoints > 200 ? " — on pace for 200+" : "");
+
+    document.getElementById("cards").innerHTML =
+      card("Goals", goals) + card("Assists", assists) + card("Points", points);
+
+    setupGameLog(games, completed);
+
+    projection = {
+      player: "Connor McDavid",
+      team: "Edmonton Oilers",
+      season: "2026–27",
+      logo: "EDM",
+      gp: gp + remaining,
+      g: Math.round(project(goals)),
+      a: Math.round(project(assists)),
+      pts: projPoints,
+      projected: true,
+    };
+    renderHistory();
+
+    const last = played[played.length - 1];
+    const lastTeamGame = completed[completed.length - 1];
+    const where = g => (g.home_game ? "vs" : "@");
+    let footer = last
+      ? `Last game: ${last.date} ${where(last)} ${last.opponent_full} (${last.goals}G ${last.assists}A). `
+      : "";
+    if (!lastTeamGame.played) {
+      footer += `Missed the Oilers' most recent game (${lastTeamGame.date} ${where(lastTeamGame)} ${lastTeamGame.opponent_full}). `;
+    }
+    footer += `Projections assume he plays every remaining game at his current per-game pace.`;
+    document.getElementById("footer").textContent = footer;
+  }
+
+  main();
+</script>
+</body>
+</html>
