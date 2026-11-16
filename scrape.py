@@ -15,10 +15,11 @@ total). Keys are omitted rather than set to null/default:
 Key glossary: oppon = opponent abbreviation, home = home game, g/a = goals/
 assists, sog = shots on goal, toi = time on ice, ppp = power-play points.
 
-Usage: python3 scrape.py [--season 20262027] [--out games.json]
+Usage: python3 scrape.py [--season 20262027] [--out docs/games.json]
 """
 import argparse
 import json
+import os
 import urllib.request
 
 PLAYER_ID = 8478402  # Connor McDavid
@@ -82,7 +83,7 @@ def write_games(games, path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--season", default="20262027")
-    ap.add_argument("--out", default="games.json")
+    ap.add_argument("--out", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", "games.json"))
     args = ap.parse_args()
 
     log = fetch_json(GAME_LOG_URL.format(pid=PLAYER_ID, season=args.season))["gameLog"]

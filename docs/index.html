@@ -257,6 +257,11 @@
   .error { color: var(--loss); }
   footer { margin-top: 32px; color: var(--muted); font-size: .85rem; }
   .disclaimer { margin: 6px 0 0; color: var(--ice-faint); font-size: .78rem; }
+  .site-links { margin: 10px 0 0; display: flex; gap: 14px; font-size: .82rem; }
+  .site-links a { color: var(--ice-soft); }
+  .site-links a:hover { color: var(--orange-hot); }
+  .version-sha { color: var(--ice-faint); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .version-sha a { color: inherit; }
 </style>
 </head>
 <body>
@@ -333,6 +338,10 @@
   <footer>
     <div id="footer"></div>
     <p class="disclaimer">Unofficial fan site; not affiliated with the NHL or the Edmonton Oilers.</p>
+    <p class="site-links">
+      <a href="https://github.com/pzelnip/connor_watch" target="_blank" rel="noopener noreferrer">View source on GitHub</a>
+      <span class="version-sha" id="version-sha">__GIT_SHA__</span>
+    </p>
   </footer>
 </main>
 
@@ -903,6 +912,12 @@
     footer += `Projections assume he plays every remaining game at his current per-game pace.`;
     document.getElementById("footer").textContent = footer;
   }
+
+  // The deploy workflow swaps the footer placeholder for a commit link. Locally
+  // (no link), hide the raw placeholder. Don't write the placeholder token in
+  // this script: the workflow's sed would rewrite it here too.
+  const sha = document.getElementById("version-sha");
+  if (!sha.querySelector("a")) sha.remove();
 
   main();
 </script>

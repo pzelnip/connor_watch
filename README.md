@@ -19,14 +19,22 @@ The page loads `games.json` with `fetch`, so it needs to be served over HTTP
 (opening `index.html` directly from disk won't work):
 
 ```sh
-python3 -m http.server
+./dev_server.sh
 ```
 
-Then open <http://localhost:8000>.
+This serves `docs/` at <http://localhost:9297> and opens it in your browser.
+
+## Deployment
+
+Every push to `main` deploys `docs/` to GitHub Pages via
+[`.github/workflows/deploy.yml`](.github/workflows/deploy.yml). The workflow
+replaces the `__GIT_SHA__` placeholder in the page footer with a link to the
+deployed commit.
 
 ## Updating the data
 
-After each game, refresh `games.json` from the public NHL API:
+After each game, refresh `docs/games.json` from the public NHL API, then commit
+and push it to redeploy:
 
 ```sh
 python3 scrape.py
@@ -40,10 +48,12 @@ are placeholders until they're played.
 
 | File | What it is |
 |---|---|
-| `index.html` | The whole site: markup, styles and JavaScript |
-| `games.json` | Per-game data written by `scrape.py` |
+| `docs/index.html` | The whole site: markup, styles and JavaScript |
+| `docs/games.json` | Per-game data written by `scrape.py` |
+| `docs/logos/` | Team logos (light and dark variants) |
 | `scrape.py` | Fetches the data from the NHL API |
-| `logos/` | Team logos (light and dark variants) |
+| `dev_server.sh` | Serves the site locally |
+| `.github/workflows/deploy.yml` | Deploys `docs/` to GitHub Pages |
 
 ### `games.json` keys
 
@@ -69,6 +79,6 @@ left out.
 
 The code and data in this repo are released under [CC0](LICENSE).
 
-The team logos in `logos/` are trademarks of the NHL and its teams and are not
+The team logos in `docs/logos/` are trademarks of the NHL and its teams and are not
 covered by that license. This is an unofficial fan site and is not affiliated
 with the NHL or the Edmonton Oilers.
