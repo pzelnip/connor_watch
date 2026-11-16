@@ -771,6 +771,9 @@
     return `<img src="logos/${abbrev}_dark.svg" alt="${alt}" title="${alt}">`;
   }
 
+  // "1 Goal" vs "0 Goals" / "2 Goals".
+  const plural = (n, word) => (n === 1 ? word : `${word}s`);
+
   function fmtDate(iso, opts) {
     return new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, opts);
   }
@@ -854,9 +857,9 @@
         </div>
         ${g.played ? `
           <div class="gl-stats">
-            ${stat("Goals", g.goals)}
-            ${stat("Assists", g.assists)}
-            ${stat("Points", g.goals + g.assists, true)}
+            ${stat(plural(g.goals, "Goal"), g.goals)}
+            ${stat(plural(g.assists, "Assist"), g.assists)}
+            ${stat(plural(g.goals + g.assists, "Point"), g.goals + g.assists, true)}
             ${stat("Season pts", ptsThen)}
             ${stat("Pace after", paceThen ?? "–")}
           </div>
@@ -903,9 +906,9 @@
 
     document.getElementById("proj-points").textContent = projPoints;
     document.getElementById("hero-note").textContent =
-      `${points} points in ${gp} games played` +
+      `${points} ${plural(points, "point")} in ${gp} ${plural(gp, "game")} played` +
       (missed ? ` (missed ${missed})` : "") +
-      ` · ${remaining} of ${games.length} games remaining` +
+      ` · ${remaining} of ${games.length} ${plural(games.length, "game")} remaining` +
       (projPoints > 200 ? " — on pace for 200+" : "");
 
     // Points banked toward 200 (fills on load).
