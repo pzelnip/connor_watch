@@ -102,6 +102,15 @@
   }
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); margin-top: 12px; }
+  @media (max-width: 560px) { .grid-2 { grid-template-columns: 1fr; } }
+  .card .proj small {
+    font-family: var(--font-body); font-size: .95rem; font-weight: 600;
+    letter-spacing: 0; color: var(--muted); margin-left: 6px;
+  }
+  /* Number, unit and badge share a text baseline so the pill lines up with "games". */
+  .grid-2 .proj { display: flex; align-items: baseline; }
+  .card .proj .badge { font-family: var(--font-body); line-height: 1.5; margin-left: 10px; }
   .card h2 {
     margin: 0; font-family: var(--font-cond); font-weight: 700; font-size: .85rem;
     letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted);
@@ -271,6 +280,8 @@
   </section>
 
   <section class="grid" id="cards"></section>
+
+  <section class="grid grid-2" id="streaks"></section>
 
   <section class="card next-game" id="next-game" hidden></section>
 
@@ -523,6 +534,57 @@
         g.goals = g.assists = g.total_points_to_date = null;
       }
     });
+  }
+
+  // ---- Point streaks ----
+
+  // A point streak is consecutive games played with at least one point.
+  // Games he didn't play (injury etc.) neither extend nor break it.
+  function computeStreaks(completed) {
+    let run = null; // { len, pts, start, end }
+    let best = null;
+    for (const g of completed) {
+      if (!g.played) continue;
+      const pts = g.goals + g.assists;
+      if (pts > 0) {
+        run = run ? { ...run, len: run.len + 1, pts: run.pts + pts, end: g } : { len: 1, pts, start: g, end: g };
+        if (!best || run.len > best.len) best = run; // earliest wins ties
+      } else {
+        run = null;
+      }
+    }
+    return { current: run, best };
+  }
+
+  function renderStreaks(completed) {
+    const { current, best } = computeStreaks(completed);
+    const day = g => fmtDate(g.date, { month: "short", day: "numeric" });
+    const vs = g => `${g.home_game ? "vs" : "@"} ${g.opponent_abbrev}`;
+    const games = n => `<small>${n === 1 ? "game" : "games"}</small>`;
+    const lastPlayed = completed.filter(g => g.played).at(-1);
+    const bestIsCurrent = best && current && best.start === current.start;
+
+    const currentCard = current ? `
+        <div class="proj">${current.len}${games(current.len)}</div>
+        <dl>
+          <dt>Started</dt><dd>${day(current.start)} ${vs(current.start)}</dd>
+          <dt>Points in streak</dt><dd>${current.pts}</dd>
+        </dl>` : `
+        <div class="proj">0${games(0)}</div>
+        <dl>
+          <dt>Last game</dt><dd>${lastPlayed ? `No points, ${day(lastPlayed)} ${vs(lastPlayed)}` : "–"}</dd>
+        </dl>`;
+
+    const bestCard = best ? `
+        <div class="proj">${best.len}${games(best.len)}${bestIsCurrent ? '<span class="badge">Active</span>' : ""}</div>
+        <dl>
+          <dt>Games</dt><dd>${best.start.game_num}–${best.end.game_num} (${day(best.start)} – ${day(best.end)})</dd>
+          <dt>Points in streak</dt><dd>${best.pts}</dd>
+        </dl>` : `<div class="proj">0${games(0)}</div>`;
+
+    document.getElementById("streaks").innerHTML = `
+      <div class="card"><h2>Current point streak</h2>${currentCard}</div>
+      <div class="card"><h2>Best streak this season</h2>${bestCard}</div>`;
   }
 
   // ---- Next game ----
@@ -808,6 +870,7 @@
     document.getElementById("cards").innerHTML =
       card("Goals", goals) + card("Assists", assists) + card("Points", points);
 
+    renderStreaks(completed);
     renderNextGame(games);
     const showGame = setupGameLog(games, completed);
     renderPaceChart(games, completed, idx => {
