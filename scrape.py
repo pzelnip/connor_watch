@@ -4,6 +4,17 @@
 The nhl.com player stats page is rendered client-side from the public NHL API,
 so we read that API directly rather than scraping HTML.
 
+games.json holds only raw per-game facts; anything derivable is computed in
+index.html (game number = list position, full team names, running points
+total). Keys are omitted rather than set to null/default:
+
+  upcoming game:  date, oppon, home, played=false
+  completed game: + edm_score, opp_score, ot ("OT"/"SO" only)
+  played game:    + played=true, g, a, sog, +/-, toi, ppp
+
+Key glossary: oppon = opponent abbreviation, home = home game, g/a = goals/
+assists, sog = shots on goal, toi = time on ice, ppp = power-play points.
+
 Usage: python3 scrape.py [--season 20262027] [--out games.json]
 """
 import argparse
@@ -14,7 +25,6 @@ PLAYER_ID = 8478402  # Connor McDavid
 TEAM = "EDM"
 GAME_LOG_URL = "https://api-web.nhle.com/v1/player/{pid}/game-log/{season}/2"
 SCHEDULE_URL = "https://api-web.nhle.com/v1/club-schedule-season/{team}/{season}"
-TEAMS_URL = "https://api.nhle.com/stats/rest/en/team"
 
 
 def fetch_json(url):
@@ -23,69 +33,50 @@ def fetch_json(url):
         return json.load(resp)
 
 
-def full_team_name(abbrev, common_name, teams):
-    """Resolve e.g. ('PHI', 'Flyers') -> 'Philadelphia Flyers'.
-
-    The team list contains historical franchises that share tricodes
-    (e.g. UTA = Utah Hockey Club / Utah Mammoth), so match on common name too.
-    """
-    candidates = [t["fullName"] for t in teams if t["triCode"] == abbrev]
-    for name in candidates:
-        if name.endswith(common_name):
-            return name
-    return candidates[-1] if candidates else common_name
-
-
-def build_games(schedule, game_log, teams):
-    """One entry per Oilers regular-season game, past and future.
+def build_games(schedule, game_log):
+    """One entry per Oilers regular-season game, past and future, in order.
 
     The player game log only contains games he dressed for, so we walk the
-    team schedule and mark completed games missing from the log as
-    played=False (stats 0). Games not yet played are placeholders with
-    played=False and null stats.
+    team schedule; completed games missing from the log are played=false.
     """
     stats = {g["gameId"]: g for g in game_log}
     season = sorted((g for g in schedule if g["gameType"] == 2),
                     key=lambda g: g["startTimeUTC"])
 
     games = []
-    total = 0
-    for num, g in enumerate(season, start=1):
+    for g in season:
         home = g["homeTeam"]["abbrev"] == TEAM
-        opp = g["awayTeam"] if home else g["homeTeam"]
-        s = stats.get(g["id"])
-        final = g["gameState"] in ("OFF", "FINAL")
-        if final:
-            goals = s["goals"] if s else 0
-            assists = s["assists"] if s else 0
-            total += goals + assists
-            total_to_date = total
-        else:
-            goals = assists = total_to_date = None
         us, them = (g["homeTeam"], g["awayTeam"]) if home else (g["awayTeam"], g["homeTeam"])
-        last_period = (g.get("gameOutcome") or {}).get("lastPeriodType")
-        games.append({
-            "game_num": num,
-            "opponent_abbrev": opp["abbrev"],
-            "opponent_full": full_team_name(
-                opp["abbrev"], opp["commonName"]["default"], teams),
-            "goals": goals,
-            "assists": assists,
+        s = stats.get(g["id"])
+        game = {
             "date": g["gameDate"],
-            "total_points_to_date": total_to_date,
-            "home_game": home,
+            "oppon": them["abbrev"],
+            "home": home,
             "played": s is not None,
-            # Game result (null until the game is final).
-            "oilers_score": us.get("score") if final else None,
-            "opponent_score": them.get("score") if final else None,
-            "decided_in": last_period if final else None,  # "REG", "OT" or "SO"
-            # Extra per-game stats (null if he didn't play or game not final).
-            "shots": s["shots"] if s else None,
-            "plus_minus": s["plusMinus"] if s else None,
-            "toi": s["toi"] if s else None,
-            "power_play_points": s["powerPlayPoints"] if s else None,
-        })
+        }
+        if g["gameState"] in ("OFF", "FINAL"):
+            game["edm_score"] = us["score"]
+            game["opp_score"] = them["score"]
+            period = (g.get("gameOutcome") or {}).get("lastPeriodType")
+            if period in ("OT", "SO"):
+                game["ot"] = period
+        if s:
+            game.update({
+                "g": s["goals"],
+                "a": s["assists"],
+                "sog": s["shots"],
+                "+/-": s["plusMinus"],
+                "toi": s["toi"],
+                "ppp": s["powerPlayPoints"],
+            })
+        games.append(game)
     return games
+
+
+def write_games(games, path):
+    with open(path, "w") as f:
+        json.dump({"games": games}, f, indent=4, ensure_ascii=False)
+        f.write("\n")
 
 
 def main():
@@ -96,17 +87,15 @@ def main():
 
     log = fetch_json(GAME_LOG_URL.format(pid=PLAYER_ID, season=args.season))["gameLog"]
     schedule = fetch_json(SCHEDULE_URL.format(team=TEAM, season=args.season))["games"]
-    teams = fetch_json(TEAMS_URL)["data"]
-    games = build_games(schedule, log, teams)
+    games = build_games(schedule, log)
+    write_games(games, args.out)
 
-    with open(args.out, "w") as f:
-        json.dump({"games": games}, f, indent=4)
-        f.write("\n")
-    done = [g for g in games if g["goals"] is not None]
-    played = sum(g["played"] for g in done)
+    done = [g for g in games if "edm_score" in g]
+    played = [g for g in done if g["played"]]
+    points = sum(g["g"] + g["a"] for g in played)
     print(f"Wrote {len(games)} games to {args.out}: {len(done)} completed "
-          f"({played} played), {len(games) - len(done)} upcoming"
-          + (f"; {done[-1]['total_points_to_date']} pts through {done[-1]['date']}" if done else ""))
+          f"({len(played)} played), {len(games) - len(done)} upcoming"
+          + (f"; {points} pts through {done[-1]['date']}" if done else ""))
 
 
 if __name__ == "__main__":

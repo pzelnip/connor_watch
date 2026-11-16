@@ -345,6 +345,56 @@
       </div>`;
   }
 
+  // ---- games.json → full game objects ----
+
+  const TEAMS = {
+    ANA: "Anaheim Ducks",        BOS: "Boston Bruins",        BUF: "Buffalo Sabres",
+    CAR: "Carolina Hurricanes",  CBJ: "Columbus Blue Jackets", CGY: "Calgary Flames",
+    CHI: "Chicago Blackhawks",   COL: "Colorado Avalanche",   DAL: "Dallas Stars",
+    DET: "Detroit Red Wings",    EDM: "Edmonton Oilers",      FLA: "Florida Panthers",
+    LAK: "Los Angeles Kings",    MIN: "Minnesota Wild",       MTL: "Montréal Canadiens",
+    NJD: "New Jersey Devils",    NSH: "Nashville Predators",  NYI: "New York Islanders",
+    NYR: "New York Rangers",     OTT: "Ottawa Senators",      PHI: "Philadelphia Flyers",
+    PIT: "Pittsburgh Penguins",  SEA: "Seattle Kraken",       SJS: "San Jose Sharks",
+    STL: "St. Louis Blues",      TBL: "Tampa Bay Lightning",  TOR: "Toronto Maple Leafs",
+    UTA: "Utah Mammoth",         VAN: "Vancouver Canucks",    VGK: "Vegas Golden Knights",
+    WPG: "Winnipeg Jets",        WSH: "Washington Capitals",
+  };
+
+  // games.json stores only raw facts and omits empty keys (see scrape.py).
+  // Fill in everything derivable so the rest of the page sees full objects:
+  //   completed: false for upcoming games (no score yet)
+  //   goals/assists: 0 for a missed game, null for an upcoming one
+  // Short keys in games.json → names used throughout this page.
+  const KEYS = {
+    oppon: "opponent_abbrev", home: "home_game",
+    edm_score: "oilers_score", opp_score: "opponent_score", ot: "decided_in",
+    g: "goals", a: "assists", sog: "shots", "+/-": "plus_minus", ppp: "power_play_points",
+  };
+
+  function enrichGames(games) {
+    let total = 0;
+    games.forEach((g, i) => {
+      for (const [short, long] of Object.entries(KEYS)) {
+        if (short in g) { g[long] = g[short]; delete g[short]; }
+      }
+      g.game_num = i + 1;
+      g.opponent_full = TEAMS[g.opponent_abbrev] ?? g.opponent_abbrev;
+      g.completed = g.oilers_score !== undefined;
+      g.oilers_score ??= null;
+      g.opponent_score ??= null;
+      g.decided_in ??= g.completed ? "REG" : null;
+      if (g.completed) {
+        g.goals ??= 0;
+        g.assists ??= 0;
+        total += g.goals + g.assists;
+        g.total_points_to_date = total;
+      } else {
+        g.goals = g.assists = g.total_points_to_date = null;
+      }
+    });
+  }
+
   // ---- Game log panel ----
 
   function logoPicture(abbrev, alt) {
@@ -438,9 +488,9 @@
       return;
     }
     if (!games.length) return;
+    enrichGames(games);
 
-    // Upcoming games are placeholders with null stats.
-    const completed = games.filter(g => g.goals !== null);
+    const completed = games.filter(g => g.completed);
     if (!completed.length) return;
     const played = completed.filter(g => g.played);
     gp = played.length;
