@@ -4,6 +4,8 @@ A small static site that tracks Connor McDavid's 2026–27 season and projects h
 final point total from his pace so far. Can he become the first player since
 Wayne Gretzky to score 200+ points in a season?
 
+Live site: <https://pzelnip.github.io/connor_watch/>
+
 The page shows:
 
 - Projected goals, assists and points over the 84-game season
@@ -46,14 +48,14 @@ are placeholders until they're played.
 
 ## Files
 
-| File | What it is |
-|---|---|
-| `docs/index.html` | The whole site: markup, styles and JavaScript |
-| `docs/games.json` | Per-game data written by `scrape.py` |
-| `docs/logos/` | Team logos (light and dark variants) |
-| `scrape.py` | Fetches the data from the NHL API |
-| `dev_server.sh` | Serves the site locally |
-| `.github/workflows/deploy.yml` | Deploys `docs/` to GitHub Pages |
+| File                           | What it is                                    |
+| ------------------------------ | --------------------------------------------- |
+| `docs/index.html`              | The whole site: markup, styles and JavaScript |
+| `docs/games.json`              | Per-game data written by `scrape.py`          |
+| `docs/logos/`                  | Team logos (light and dark variants)          |
+| `scrape.py`                    | Fetches the data from the NHL API             |
+| `dev_server.sh`                | Serves the site locally                       |
+| `.github/workflows/deploy.yml` | Deploys `docs/` to GitHub Pages               |
 
 ### `games.json` keys
 
@@ -61,19 +63,19 @@ To keep the file small it stores only raw facts; the page works out game
 numbers, full team names and running totals itself. Keys that don't apply are
 left out.
 
-| Key | Meaning |
-|---|---|
-| `date` | Game date (`YYYY-MM-DD`) |
-| `oppon` | Opponent's 3-letter abbreviation |
-| `home` | `true` for a home game |
-| `played` | `true` if McDavid played (false for upcoming or missed games) |
-| `edm_score`, `opp_score` | Final score (only once the game is over) |
-| `ot` | `"OT"` or `"SO"` if the game went past regulation |
-| `g`, `a` | Goals and assists |
-| `sog` | Shots on goal |
-| `+/-` | Plus-minus |
-| `toi` | Time on ice (`mm:ss`) |
-| `ppp` | Power-play points |
+| Key                      | Meaning                                                       |
+| ------------------------ | ------------------------------------------------------------- |
+| `date`                   | Game date (`YYYY-MM-DD`)                                      |
+| `oppon`                  | Opponent's 3-letter abbreviation                              |
+| `home`                   | `true` for a home game                                        |
+| `played`                 | `true` if McDavid played (false for upcoming or missed games) |
+| `edm_score`, `opp_score` | Final score (only once the game is over)                      |
+| `ot`                     | `"OT"` or `"SO"` if the game went past regulation             |
+| `g`, `a`                 | Goals and assists                                             |
+| `sog`                    | Shots on goal                                                 |
+| `+/-`                    | Plus-minus                                                    |
+| `toi`                    | Time on ice (`mm:ss`)                                         |
+| `ppp`                    | Power-play points                                             |
 
 ## License
 
