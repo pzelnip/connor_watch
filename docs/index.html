@@ -229,6 +229,7 @@
   .stepper button:hover:not(:disabled) { border-color: var(--blue-light); }
   .stepper button:disabled { opacity: .35; cursor: default; }
   .stepper select { padding: 0 8px; min-width: 0; max-width: 240px; }
+  #gl-body { overflow: hidden; } /* clip while height animates */
   .gl-top { display: flex; align-items: center; gap: 14px; }
   .gl-top img { display: block; width: 66px; height: 44px; }
   .gl-opp { font-size: 1.15rem; font-weight: 700; }
@@ -788,8 +789,40 @@
       return `<option value="${idx}">Game ${g.game_num} · ${fmtDate(g.date, { month: "short", day: "numeric" })} ${at} ${g.opponent_abbrev} · ${pts}</option>`;
     }).join("");
 
+    // Crossfade between games: old content fades/slides out, new content
+    // fades/slides in from the direction of travel; the card eases to its new height.
+    let lastIdx = null;
+    let swapToken = 0;
+    function render(html, dir) {
+      const token = ++swapToken;
+      const old = body.firstElementChild;
+      const put = () => { body.innerHTML = `<div class="gl-content">${html}</div>`; };
+      if (!old || reduceMotion.matches) { put(); return; }
+
+      // Single keyframe = animate from wherever it is now (smooth on rapid clicks).
+      // The swap runs on a timer rather than the animation's `finished` promise,
+      // which can stall (e.g. animations paused in a background tab).
+      const OUT_MS = 120;
+      old.animate([{ opacity: 0, transform: `translateX(${-dir * 12}px)` }],
+        { duration: OUT_MS, easing: "ease-in", fill: "forwards" });
+      setTimeout(() => {
+        if (token !== swapToken) return; // a newer switch took over
+        const h0 = body.offsetHeight;
+        put();
+        const h1 = body.offsetHeight;
+        if (h0 !== h1) {
+          body.animate([{ height: `${h0}px` }, { height: `${h1}px` }], { duration: 200, easing: "ease-out" });
+        }
+        body.firstElementChild.animate(
+          [{ opacity: 0, transform: `translateX(${dir * 12}px)` }, { opacity: 1, transform: "none" }],
+          { duration: 180, easing: "ease-out" });
+      }, OUT_MS);
+    }
+
     function show(idx) {
       const g = completed[idx];
+      const dir = lastIdx === null ? 0 : Math.sign(idx - lastIdx);
+      lastIdx = idx;
       select.value = String(idx);
       prev.disabled = idx === 0;
       next.disabled = idx === completed.length - 1;
@@ -810,7 +843,7 @@
       const stat = (k, v, hl) => `<div class="gl-stat${hl ? " hl" : ""}"><div class="v">${v}</div><div class="k">${k}</div></div>`;
       const pm = g.plus_minus > 0 ? `+${g.plus_minus}` : g.plus_minus;
 
-      body.innerHTML = `
+      render(`
         <div class="gl-top">
           ${logoPicture(g.opponent_abbrev, g.opponent_full)}
           <div>
@@ -834,7 +867,7 @@
             <span>PP points <b>${g.power_play_points ?? "–"}</b></span>
           </div>` : `
           <div class="gl-dnp">Did not play · season total stays at ${ptsThen} pts</div>`}
-      `;
+      `, dir);
     }
 
     select.addEventListener("change", () => show(Number(select.value)));
