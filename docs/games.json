@@ -318,7 +318,15 @@
             "date": "2026-11-17",
             "oppon": "FLA",
             "home": false,
-            "played": false
+            "played": true,
+            "edm_score": 5,
+            "opp_score": 2,
+            "g": 1,
+            "a": 1,
+            "sog": 2,
+            "+/-": 0,
+            "toi": "21:29",
+            "ppp": 2
         },
         {
             "date": "2026-11-19",
