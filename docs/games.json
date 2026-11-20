@@ -332,7 +332,15 @@
             "date": "2026-11-19",
             "oppon": "TBL",
             "home": false,
-            "played": false
+            "played": true,
+            "edm_score": 1,
+            "opp_score": 3,
+            "g": 0,
+            "a": 0,
+            "sog": 2,
+            "+/-": -1,
+            "toi": "22:57",
+            "ppp": 0
         },
         {
             "date": "2026-11-21",
