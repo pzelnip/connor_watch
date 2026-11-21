@@ -46,6 +46,14 @@ It only uses the Python standard library. It downloads the Oilers' schedule and
 McDavid's game log, then writes one entry per regular-season game. Upcoming games
 are placeholders until they're played.
 
+To automate it, `update.sh` pulls, runs the scraper, and commits and pushes
+`games.json` only if it changed. It's meant for cron on a machine with push
+access to the repo:
+
+```cron
+17 * * * * /path/to/connor_watch/update.sh >> /path/to/update.log 2>&1
+```
+
 ## Files
 
 | File                           | What it is                                    |
@@ -54,6 +62,7 @@ are placeholders until they're played.
 | `docs/games.json`              | Per-game data written by `scrape.py`          |
 | `docs/logos/`                  | Team logos (light and dark variants)          |
 | `scrape.py`                    | Fetches the data from the NHL API             |
+| `update.sh`                    | Scrapes, then commits and pushes any changes  |
 | `dev_server.sh`                | Serves the site locally                       |
 | `.github/workflows/deploy.yml` | Deploys `docs/` to GitHub Pages               |
 
