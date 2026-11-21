@@ -346,7 +346,9 @@
             "date": "2026-11-21",
             "oppon": "CAR",
             "home": false,
-            "played": false
+            "played": false,
+            "edm_score": 4,
+            "opp_score": 7
         },
         {
             "date": "2026-11-22",
