@@ -84,3 +84,4 @@ The code and data in this repo are released under [CC0](LICENSE).
 The team logos in `docs/logos/` are trademarks of the NHL and its teams and are not
 covered by that license. This is an unofficial fan site and is not affiliated
 with the NHL or the Edmonton Oilers.
+
