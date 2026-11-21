@@ -2,10 +2,9 @@ name: Update game data
 
 on:
   schedule:
-    # Hourly, 8 AM to 11 PM Pacific Standard Time (UTC-8). Cron runs in UTC:
-    # 16:00-23:00 UTC is 8 AM-3 PM PST, 00:00-07:00 UTC is 4 PM-11 PM PST.
-    # While daylight time is in effect (PDT, UTC-7) this shifts to 9 AM-midnight.
-    - cron: "0 16-23,0-7 * * *"
+    # Hourly, at 17 past: GitHub's scheduler is busiest at :00, where runs are
+    # often delayed or dropped.
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
