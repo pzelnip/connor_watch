@@ -21,11 +21,17 @@ import argparse
 import json
 import os
 import urllib.request
+from datetime import datetime, timedelta, timezone
 
 PLAYER_ID = 8478402  # Connor McDavid
 TEAM = "EDM"
 GAME_LOG_URL = "https://api-web.nhle.com/v1/player/{pid}/game-log/{season}/2"
 SCHEDULE_URL = "https://api-web.nhle.com/v1/club-schedule-season/{team}/{season}"
+
+# The schedule marks a game final before the player's game log includes it.
+# For this long after puck drop, a final game missing from the log is treated
+# as not finished yet, rather than as a game he missed.
+LOG_LAG = timedelta(hours=12)
 
 
 def fetch_json(url):
@@ -34,13 +40,19 @@ def fetch_json(url):
         return json.load(resp)
 
 
-def build_games(schedule, game_log):
+def build_games(schedule, game_log, now=None):
     """One entry per Oilers regular-season game, past and future, in order.
 
     The player game log only contains games he dressed for, so we walk the
-    team schedule; completed games missing from the log are played=false.
+    team schedule; completed games missing from the log are played=false,
+    except within LOG_LAG of puck drop, when they're left as upcoming.
+
+    Returns (games, pending), where pending lists final games still waiting
+    on the game log.
     """
+    now = now or datetime.now(timezone.utc)
     stats = {g["gameId"]: g for g in game_log}
+    pending = []
     season = sorted((g for g in schedule if g["gameType"] == 2),
                     key=lambda g: g["startTimeUTC"])
 
@@ -55,7 +67,13 @@ def build_games(schedule, game_log):
             "home": home,
             "played": s is not None,
         }
-        if g["gameState"] in ("OFF", "FINAL"):
+        final = g["gameState"] in ("OFF", "FINAL")
+        if final and s is None:
+            start = datetime.fromisoformat(g["startTimeUTC"].replace("Z", "+00:00"))
+            if now - start < LOG_LAG:
+                final = False
+                pending.append(game)
+        if final:
             game["edm_score"] = us["score"]
             game["opp_score"] = them["score"]
             period = (g.get("gameOutcome") or {}).get("lastPeriodType")
@@ -71,7 +89,7 @@ def build_games(schedule, game_log):
                 "ppp": s["powerPlayPoints"],
             })
         games.append(game)
-    return games
+    return games, pending
 
 
 def write_games(games, path):
@@ -88,7 +106,7 @@ def main():
 
     log = fetch_json(GAME_LOG_URL.format(pid=PLAYER_ID, season=args.season))["gameLog"]
     schedule = fetch_json(SCHEDULE_URL.format(team=TEAM, season=args.season))["games"]
-    games = build_games(schedule, log)
+    games, pending = build_games(schedule, log)
     write_games(games, args.out)
 
     done = [g for g in games if "edm_score" in g]
@@ -97,6 +115,9 @@ def main():
     print(f"Wrote {len(games)} games to {args.out}: {len(done)} completed "
           f"({len(played)} played), {len(games) - len(done)} upcoming"
           + (f"; {points} pts through {done[-1]['date']}" if done else ""))
+    for g in pending:
+        print(f"{g['date']} vs {g['oppon']} is final but not in the game log yet; "
+              "left as upcoming")
 
 
 if __name__ == "__main__":
