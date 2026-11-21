@@ -346,9 +346,15 @@
             "date": "2026-11-21",
             "oppon": "CAR",
             "home": false,
-            "played": false,
+            "played": true,
             "edm_score": 4,
-            "opp_score": 7
+            "opp_score": 7,
+            "g": 0,
+            "a": 2,
+            "sog": 0,
+            "+/-": -2,
+            "toi": "25:04",
+            "ppp": 2
         },
         {
             "date": "2026-11-22",
