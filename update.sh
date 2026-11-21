@@ -5,7 +5,8 @@
 set -e
 cd "$(dirname "$0")"
 
-echo "== $(date '+%Y-%m-%d %H:%M:%S')"
+NOW=$(date '+%Y-%m-%d %H:%M')
+echo "== $NOW"
 git pull -q --rebase
 python3 scrape.py
 
@@ -15,6 +16,6 @@ if git diff --quiet docs/games.json; then
 fi
 
 git add docs/games.json
-git commit -q -m "Update game data"
+git commit -q -m "Update game data ($NOW)"
 git push -q
 echo "Pushed update"
