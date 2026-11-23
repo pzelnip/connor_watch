@@ -360,7 +360,16 @@
             "date": "2026-11-22",
             "oppon": "STL",
             "home": false,
-            "played": false
+            "played": true,
+            "edm_score": 4,
+            "opp_score": 5,
+            "ot": "SO",
+            "g": 0,
+            "a": 1,
+            "sog": 2,
+            "+/-": 0,
+            "toi": "26:58",
+            "ppp": 0
         },
         {
             "date": "2026-11-24",
