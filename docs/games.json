@@ -375,7 +375,15 @@
             "date": "2026-11-24",
             "oppon": "VGK",
             "home": true,
-            "played": false
+            "played": true,
+            "edm_score": 3,
+            "opp_score": 5,
+            "g": 1,
+            "a": 0,
+            "sog": 4,
+            "+/-": -1,
+            "toi": "23:14",
+            "ppp": 0
         },
         {
             "date": "2026-11-27",
