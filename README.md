@@ -85,6 +85,7 @@ left out.
 | `+/-`                    | Plus-minus                                                    |
 | `toi`                    | Time on ice (`mm:ss`)                                         |
 | `ppp`                    | Power-play points                                             |
+| `tentative`              | `true` if stats are from the box score (log not updated yet)  |
 
 ## License
 
