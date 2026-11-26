@@ -605,15 +605,21 @@
 
   // ---- Next game ----
 
+  let nextGame = null; // the game shown in the card, kept for label refreshes
+
+  // Whole days between today (local) and a game date. Pinning both to local
+  // noon keeps DST changes from shifting the count.
+  function whenText(dateIso) {
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    const days = Math.round((new Date(`${dateIso}T12:00:00`) - today) / 864e5);
+    return days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
+  }
+
   function renderNextGame(games) {
     const el = document.getElementById("next-game");
     const g = games.find(x => !x.completed);
+    nextGame = g ?? null;
     if (!g) { el.hidden = true; return; }
-
-    // Whole days between today (local) and the game date.
-    const today = new Date(); today.setHours(12, 0, 0, 0);
-    const days = Math.round((new Date(`${g.date}T12:00:00`) - today) / 864e5);
-    const when = days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
 
     el.innerHTML = `
       ${logoPicture(g.opponent_abbrev, g.opponent_full)}
@@ -622,8 +628,34 @@
         <div class="ng-opp">${g.home_game ? "vs" : "@"} ${g.opponent_full}</div>
         <div class="gl-meta">${fmtDate(g.date, { weekday: "short", month: "short", day: "numeric" })} · ${g.home_game ? "Home" : "Road"}</div>
       </div>
-      <div class="ng-when">${when}</div>`;
+      <div class="ng-when">${whenText(g.date)}</div>`;
     el.hidden = false;
+  }
+
+  // Only the relative label changes as days pass, so leave the rest of the
+  // card alone (including any logo that's still loading).
+  function refreshNextGameWhen() {
+    const pill = document.querySelector("#next-game .ng-when");
+    if (!nextGame || !pill) return;
+    const when = whenText(nextGame.date);
+    if (pill.textContent !== when) pill.textContent = when;
+  }
+
+  // Recompute at each local midnight, and as soon as the page is looked at
+  // again: browsers throttle timers in hidden tabs, so a tab left open for a
+  // day would otherwise still show a stale label on return.
+  function startNextGameTicker() {
+    const tick = () => {
+      refreshNextGameWhen();
+      const now = new Date();
+      const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+      setTimeout(tick, midnight - now + 1000); // just after midnight
+    };
+    tick();
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshNextGameWhen();
+    });
+    window.addEventListener("focus", refreshNextGameWhen);
   }
 
   // ---- Projection-over-time chart ----
@@ -927,6 +959,7 @@
 
     renderStreaks(completed);
     renderNextGame(games);
+    startNextGameTicker();
     const showGame = setupGameLog(games, completed);
     renderPaceChart(games, completed, idx => {
       showGame(idx);
