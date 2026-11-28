@@ -75,6 +75,7 @@ left out.
 | Key                      | Meaning                                                       |
 | ------------------------ | ------------------------------------------------------------- |
 | `date`                   | Game date (`YYYY-MM-DD`)                                      |
+| `start`                  | Puck drop in UTC (ISO 8601)                                   |
 | `oppon`                  | Opponent's 3-letter abbreviation                              |
 | `home`                   | `true` for a home game                                        |
 | `played`                 | `true` if McDavid played (false for upcoming or missed games) |

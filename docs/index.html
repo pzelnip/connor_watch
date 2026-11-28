@@ -133,9 +133,18 @@
   }
   .ng-opp { font-weight: 700; font-size: 1.1rem; }
   .ng-when {
-    margin-left: auto; white-space: nowrap; font-weight: 700; font-size: .85rem;
+    position: relative; margin-left: auto; white-space: nowrap; font-weight: 700; font-size: .85rem;
     color: var(--orange-hot); background: var(--proj-bg); padding: 3px 10px; border-radius: 999px;
   }
+  .ng-when[data-tip] { cursor: help; }
+  .ng-when[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 3;
+    pointer-events: none; color: var(--text); font-weight: 400;
+    opacity: 0; visibility: hidden; transition: opacity .12s ease;
+  }
+  .ng-when[data-tip]:hover::after,
+  .ng-when[data-tip]:focus-visible::after { opacity: 1; visibility: visible; }
 
   /* ---------- Section headings ---------- */
   .history, .pace, .gamelog { margin-top: 36px; }
@@ -176,12 +185,13 @@
     paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; /* halo over ref lines */
   }
   .pace-chart .crosshair { stroke: var(--muted); stroke-width: 1; }
-  .pace-tip {
-    position: absolute; pointer-events: none; z-index: 2;
+  /* Shared tooltip look: the chart tip and the next-game start-time tip. */
+  .pace-tip, .ng-when::after {
     background: var(--blue-deep); border: 1px solid var(--blue-light); border-radius: 8px;
     box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
     padding: 7px 10px; font-size: .82rem; white-space: nowrap;
   }
+  .pace-tip { position: absolute; pointer-events: none; z-index: 2; }
   .pace-tip .tv { font-size: 1.05rem; font-weight: 700; font-variant-numeric: tabular-nums; }
   .pace-tip .tv::before {
     content: ""; display: inline-block; width: 12px; height: 2px; margin-right: 6px;
@@ -615,12 +625,27 @@
     return days <= 0 ? "Today" : days === 1 ? "Tomorrow" : `In ${days} days`;
   }
 
+  // Puck drop in the viewer's local time, for the hover/focus tooltip.
+  function startTip(startUtc) {
+    if (!startUtc) return "";
+    const d = new Date(startUtc);
+    if (Number.isNaN(d.getTime())) return "";
+    const time = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+    const zone = new Intl.DateTimeFormat(undefined, { timeZoneName: "short" })
+      .formatToParts(d).find(p => p.type === "timeZoneName")?.value;
+    return `Starts ${time}${zone ? ` ${zone}` : ""}`;
+  }
+
   function renderNextGame(games) {
     const el = document.getElementById("next-game");
     const g = games.find(x => !x.completed);
     nextGame = g ?? null;
     if (!g) { el.hidden = true; return; }
 
+    const when = whenText(g.date);
+    const tip = startTip(g.start);
+    // tabindex/aria-label make the tooltip reachable by keyboard and screen reader.
+    const attrs = tip ? ` data-tip="${tip}" tabindex="0" aria-label="${when}. ${tip}"` : "";
     el.innerHTML = `
       ${logoPicture(g.opponent_abbrev, g.opponent_full)}
       <div>
@@ -628,7 +653,7 @@
         <div class="ng-opp">${g.home_game ? "vs" : "@"} ${g.opponent_full}</div>
         <div class="gl-meta">${fmtDate(g.date, { weekday: "short", month: "short", day: "numeric" })} · ${g.home_game ? "Home" : "Road"}</div>
       </div>
-      <div class="ng-when">${whenText(g.date)}</div>`;
+      <div class="ng-when"${attrs}>${when}</div>`;
     el.hidden = false;
   }
 
@@ -638,7 +663,10 @@
     const pill = document.querySelector("#next-game .ng-when");
     if (!nextGame || !pill) return;
     const when = whenText(nextGame.date);
-    if (pill.textContent !== when) pill.textContent = when;
+    if (pill.textContent !== when) {
+      pill.textContent = when;
+      if (pill.dataset.tip) pill.setAttribute("aria-label", `${when}. ${pill.dataset.tip}`);
+    }
   }
 
   // Recompute at each local midnight, and as soon as the page is looked at

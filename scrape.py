@@ -8,15 +8,16 @@ games.json holds only raw per-game facts; anything derivable is computed in
 index.html (game number = list position, full team names, running points
 total). Keys are omitted rather than set to null/default:
 
-  upcoming game:  date, oppon, home, played=false
+  upcoming game:  date, start (UTC), oppon, home, played=false
   completed game: + edm_score, opp_score, ot ("OT"/"SO" only)
   played game:    + played=true, g, a, sog, +/-, toi, ppp
   tentative game: + tentative=true; stats taken from the game's box score
                   because his game log hasn't caught up yet (no ppp, which
                   the box score lacks). Replaced once the log has the game.
 
-Key glossary: oppon = opponent abbreviation, home = home game, g/a = goals/
-assists, sog = shots on goal, toi = time on ice, ppp = power-play points.
+Key glossary: start = puck drop in UTC (ISO 8601), oppon = opponent
+abbreviation, home = home game, g/a = goals/assists, sog = shots on goal,
+toi = time on ice, ppp = power-play points.
 
 Usage: python3 scrape.py [--season 20262027] [--out docs/games.json]
 """
@@ -95,6 +96,7 @@ def build_games(schedule, game_log, now=None, boxscore=fetch_boxscore_stats):
             from_boxscore = s is not None
         game = {
             "date": g["gameDate"],
+            "start": g["startTimeUTC"],
             "oppon": them["abbrev"],
             "home": home,
             "played": s is not None,

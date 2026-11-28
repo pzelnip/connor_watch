@@ -2,6 +2,7 @@
     "games": [
         {
             "date": "2026-09-29",
+            "start": "2026-09-30T02:00:00Z",
             "oppon": "VAN",
             "home": true,
             "played": true,
@@ -17,6 +18,7 @@
         },
         {
             "date": "2026-10-01",
+            "start": "2026-10-02T02:00:00Z",
             "oppon": "VAN",
             "home": false,
             "played": true,
@@ -31,6 +33,7 @@
         },
         {
             "date": "2026-10-03",
+            "start": "2026-10-03T23:00:00Z",
             "oppon": "SEA",
             "home": true,
             "played": true,
@@ -45,6 +48,7 @@
         },
         {
             "date": "2026-10-07",
+            "start": "2026-10-08T02:00:00Z",
             "oppon": "ANA",
             "home": false,
             "played": true,
@@ -59,6 +63,7 @@
         },
         {
             "date": "2026-10-10",
+            "start": "2026-10-10T20:00:00Z",
             "oppon": "SJS",
             "home": false,
             "played": true,
@@ -73,6 +78,7 @@
         },
         {
             "date": "2026-10-13",
+            "start": "2026-10-14T02:30:00Z",
             "oppon": "LAK",
             "home": false,
             "played": true,
@@ -87,6 +93,7 @@
         },
         {
             "date": "2026-10-15",
+            "start": "2026-10-16T01:00:00Z",
             "oppon": "UTA",
             "home": true,
             "played": true,
@@ -101,6 +108,7 @@
         },
         {
             "date": "2026-10-17",
+            "start": "2026-10-18T02:00:00Z",
             "oppon": "UTA",
             "home": false,
             "played": true,
@@ -115,6 +123,7 @@
         },
         {
             "date": "2026-10-20",
+            "start": "2026-10-21T01:00:00Z",
             "oppon": "MIN",
             "home": true,
             "played": true,
@@ -130,6 +139,7 @@
         },
         {
             "date": "2026-10-22",
+            "start": "2026-10-23T01:00:00Z",
             "oppon": "CAR",
             "home": true,
             "played": true,
@@ -145,6 +155,7 @@
         },
         {
             "date": "2026-10-24",
+            "start": "2026-10-24T23:00:00Z",
             "oppon": "TOR",
             "home": true,
             "played": true,
@@ -159,6 +170,7 @@
         },
         {
             "date": "2026-10-26",
+            "start": "2026-10-27T01:30:00Z",
             "oppon": "DET",
             "home": true,
             "played": true,
@@ -174,6 +186,7 @@
         },
         {
             "date": "2026-10-28",
+            "start": "2026-10-29T00:30:00Z",
             "oppon": "CGY",
             "home": true,
             "played": true,
@@ -188,6 +201,7 @@
         },
         {
             "date": "2026-10-31",
+            "start": "2026-10-31T18:00:00Z",
             "oppon": "NYI",
             "home": false,
             "played": true,
@@ -202,6 +216,7 @@
         },
         {
             "date": "2026-11-01",
+            "start": "2026-11-01T23:00:00Z",
             "oppon": "NYR",
             "home": false,
             "played": true,
@@ -216,6 +231,7 @@
         },
         {
             "date": "2026-11-03",
+            "start": "2026-11-04T00:30:00Z",
             "oppon": "NJD",
             "home": false,
             "played": true,
@@ -231,6 +247,7 @@
         },
         {
             "date": "2026-11-05",
+            "start": "2026-11-06T01:00:00Z",
             "oppon": "ANA",
             "home": true,
             "played": true,
@@ -245,6 +262,7 @@
         },
         {
             "date": "2026-11-07",
+            "start": "2026-11-08T03:00:00Z",
             "oppon": "VAN",
             "home": true,
             "played": true,
@@ -259,6 +277,7 @@
         },
         {
             "date": "2026-11-09",
+            "start": "2026-11-10T01:00:00Z",
             "oppon": "NYR",
             "home": true,
             "played": true,
@@ -273,6 +292,7 @@
         },
         {
             "date": "2026-11-11",
+            "start": "2026-11-12T02:00:00Z",
             "oppon": "PHI",
             "home": true,
             "played": true,
@@ -288,6 +308,7 @@
         },
         {
             "date": "2026-11-14",
+            "start": "2026-11-15T00:00:00Z",
             "oppon": "TOR",
             "home": false,
             "played": true,
@@ -302,6 +323,7 @@
         },
         {
             "date": "2026-11-15",
+            "start": "2026-11-16T00:30:00Z",
             "oppon": "PHI",
             "home": false,
             "played": true,
@@ -316,6 +338,7 @@
         },
         {
             "date": "2026-11-17",
+            "start": "2026-11-18T00:00:00Z",
             "oppon": "FLA",
             "home": false,
             "played": true,
@@ -330,6 +353,7 @@
         },
         {
             "date": "2026-11-19",
+            "start": "2026-11-20T00:30:00Z",
             "oppon": "TBL",
             "home": false,
             "played": true,
@@ -344,6 +368,7 @@
         },
         {
             "date": "2026-11-21",
+            "start": "2026-11-21T18:00:00Z",
             "oppon": "CAR",
             "home": false,
             "played": true,
@@ -358,6 +383,7 @@
         },
         {
             "date": "2026-11-22",
+            "start": "2026-11-23T00:00:00Z",
             "oppon": "STL",
             "home": false,
             "played": true,
@@ -373,6 +399,7 @@
         },
         {
             "date": "2026-11-24",
+            "start": "2026-11-25T01:00:00Z",
             "oppon": "VGK",
             "home": true,
             "played": true,
@@ -387,6 +414,7 @@
         },
         {
             "date": "2026-11-27",
+            "start": "2026-11-28T01:00:00Z",
             "oppon": "SEA",
             "home": true,
             "played": true,
@@ -401,336 +429,392 @@
         },
         {
             "date": "2026-11-28",
+            "start": "2026-11-29T03:00:00Z",
             "oppon": "SEA",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-01",
+            "start": "2026-12-02T01:00:00Z",
             "oppon": "BUF",
             "home": true,
             "played": false
         },
         {
             "date": "2026-12-03",
+            "start": "2026-12-04T01:00:00Z",
             "oppon": "WSH",
             "home": true,
             "played": false
         },
         {
             "date": "2026-12-06",
+            "start": "2026-12-07T00:00:00Z",
             "oppon": "CHI",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-08",
+            "start": "2026-12-09T01:00:00Z",
             "oppon": "MIN",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-10",
+            "start": "2026-12-11T00:00:00Z",
             "oppon": "BUF",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-12",
+            "start": "2026-12-13T00:00:00Z",
             "oppon": "OTT",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-14",
+            "start": "2026-12-15T00:30:00Z",
             "oppon": "MTL",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-17",
+            "start": "2026-12-18T01:00:00Z",
             "oppon": "DAL",
             "home": true,
             "played": false
         },
         {
             "date": "2026-12-19",
+            "start": "2026-12-19T20:30:00Z",
             "oppon": "UTA",
             "home": true,
             "played": false
         },
         {
             "date": "2026-12-20",
+            "start": "2026-12-21T00:00:00Z",
             "oppon": "ANA",
             "home": true,
             "played": false
         },
         {
             "date": "2026-12-27",
+            "start": "2026-12-27T23:00:00Z",
             "oppon": "CBJ",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-28",
+            "start": "2026-12-29T00:00:00Z",
             "oppon": "WSH",
             "home": false,
             "played": false
         },
         {
             "date": "2026-12-30",
+            "start": "2026-12-31T00:30:00Z",
             "oppon": "BOS",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-02",
+            "start": "2027-01-02T20:30:00Z",
             "oppon": "DET",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-03",
+            "start": "2027-01-03T20:00:00Z",
             "oppon": "PIT",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-05",
+            "start": "2027-01-06T00:30:00Z",
             "oppon": "NSH",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-07",
+            "start": "2027-01-08T01:00:00Z",
             "oppon": "FLA",
             "home": true,
             "played": false
         },
         {
             "date": "2027-01-09",
+            "start": "2027-01-09T20:30:00Z",
             "oppon": "NYI",
             "home": true,
             "played": false
         },
         {
             "date": "2027-01-11",
+            "start": "2027-01-12T01:30:00Z",
             "oppon": "TBL",
             "home": true,
             "played": false
         },
         {
             "date": "2027-01-13",
+            "start": "2027-01-14T02:00:00Z",
             "oppon": "SJS",
             "home": true,
             "played": false
         },
         {
             "date": "2027-01-15",
+            "start": "2027-01-16T01:00:00Z",
             "oppon": "CBJ",
             "home": true,
             "played": false
         },
         {
             "date": "2027-01-17",
+            "start": "2027-01-18T00:00:00Z",
             "oppon": "WPG",
             "home": true,
             "played": false
         },
         {
             "date": "2027-01-20",
+            "start": "2027-01-21T03:00:00Z",
             "oppon": "VGK",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-21",
+            "start": "2027-01-22T03:00:00Z",
             "oppon": "LAK",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-23",
+            "start": "2027-01-24T03:00:00Z",
             "oppon": "SJS",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-26",
+            "start": "2027-01-27T02:00:00Z",
             "oppon": "COL",
             "home": false,
             "played": false
         },
         {
             "date": "2027-01-28",
+            "start": "2027-01-29T01:00:00Z",
             "oppon": "NJD",
             "home": true,
             "played": false
         },
         {
             "date": "2027-01-30",
+            "start": "2027-01-31T00:00:00Z",
             "oppon": "MTL",
             "home": true,
             "played": false
         },
         {
             "date": "2027-02-03",
+            "start": "2027-02-04T02:00:00Z",
             "oppon": "VGK",
             "home": true,
             "played": false
         },
         {
             "date": "2027-02-12",
+            "start": "2027-02-13T01:00:00Z",
             "oppon": "STL",
             "home": true,
             "played": false
         },
         {
             "date": "2027-02-13",
+            "start": "2027-02-14T00:00:00Z",
             "oppon": "PIT",
             "home": true,
             "played": false
         },
         {
             "date": "2027-02-17",
+            "start": "2027-02-18T02:00:00Z",
             "oppon": "COL",
             "home": true,
             "played": false
         },
         {
             "date": "2027-02-19",
+            "start": "2027-02-20T01:00:00Z",
             "oppon": "BOS",
             "home": true,
             "played": false
         },
         {
             "date": "2027-02-22",
+            "start": "2027-02-23T00:30:00Z",
             "oppon": "OTT",
             "home": true,
             "played": false
         },
         {
             "date": "2027-02-25",
+            "start": "2027-02-26T01:00:00Z",
             "oppon": "NSH",
             "home": false,
             "played": false
         },
         {
             "date": "2027-02-27",
+            "start": "2027-02-27T20:00:00Z",
             "oppon": "DAL",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-01",
+            "start": "2027-03-02T01:30:00Z",
             "oppon": "CHI",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-03",
+            "start": "2027-03-04T01:30:00Z",
             "oppon": "CGY",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-06",
+            "start": "2027-03-07T03:00:00Z",
             "oppon": "CHI",
             "home": true,
             "played": false
         },
         {
             "date": "2027-03-09",
+            "start": "2027-03-10T01:00:00Z",
             "oppon": "LAK",
             "home": true,
             "played": false
         },
         {
             "date": "2027-03-11",
+            "start": "2027-03-12T01:00:00Z",
             "oppon": "NSH",
             "home": true,
             "played": false
         },
         {
             "date": "2027-03-13",
+            "start": "2027-03-14T03:00:00Z",
             "oppon": "SEA",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-15",
+            "start": "2027-03-16T01:30:00Z",
             "oppon": "COL",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-18",
+            "start": "2027-03-19T01:00:00Z",
             "oppon": "STL",
             "home": true,
             "played": false
         },
         {
             "date": "2027-03-20",
+            "start": "2027-03-20T19:30:00Z",
             "oppon": "DAL",
             "home": true,
             "played": false
         },
         {
             "date": "2027-03-21",
+            "start": "2027-03-22T01:00:00Z",
             "oppon": "VAN",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-23",
+            "start": "2027-03-24T01:00:00Z",
             "oppon": "CGY",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-25",
+            "start": "2027-03-26T01:00:00Z",
             "oppon": "MIN",
             "home": false,
             "played": false
         },
         {
             "date": "2027-03-27",
+            "start": "2027-03-27T19:30:00Z",
             "oppon": "LAK",
             "home": true,
             "played": false
         },
         {
             "date": "2027-03-31",
+            "start": "2027-04-01T00:30:00Z",
             "oppon": "SJS",
             "home": true,
             "played": false
         },
         {
             "date": "2027-04-02",
+            "start": "2027-04-03T02:00:00Z",
             "oppon": "VGK",
             "home": false,
             "played": false
         },
         {
             "date": "2027-04-03",
+            "start": "2027-04-04T02:00:00Z",
             "oppon": "ANA",
             "home": false,
             "played": false
         },
         {
             "date": "2027-04-05",
+            "start": "2027-04-06T01:30:00Z",
             "oppon": "CGY",
             "home": true,
             "played": false
         },
         {
             "date": "2027-04-07",
+            "start": "2027-04-08T00:00:00Z",
             "oppon": "WPG",
             "home": false,
             "played": false
         },
         {
             "date": "2027-04-10",
+            "start": "2027-04-11T02:00:00Z",
             "oppon": "WPG",
             "home": true,
             "played": false
