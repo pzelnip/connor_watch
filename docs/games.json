@@ -389,7 +389,15 @@
             "date": "2026-11-27",
             "oppon": "SEA",
             "home": true,
-            "played": false
+            "played": true,
+            "edm_score": 2,
+            "opp_score": 4,
+            "g": 1,
+            "a": 0,
+            "sog": 2,
+            "+/-": -2,
+            "toi": "24:18",
+            "ppp": 1
         },
         {
             "date": "2026-11-28",
